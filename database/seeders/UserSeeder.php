@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
                 'email' => 'jean.leclerc@campusconnect.com',
                 'telephone' => '0123456792',
                 'role' => 'teacher',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password123'), 
             ],
             [
                 'firstname' => 'Prof. Sophie',
