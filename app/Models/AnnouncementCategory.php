@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,18 +10,50 @@ class AnnouncementCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug'];
+    /**
+     * The table associated with the model.
+     */
+    protected $table = 'announcement_categories';
 
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'name',
+        'slug'
+    ];
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
+     * Get all announcements for this category.
+     */
     public function announcements()
     {
         return $this->hasMany(Announcement::class, 'category_id');
     }
 
-    // Crée automatiquement le slug à partir du nom
+    /**
+     * Boot method to auto-generate slug from name.
+     */
     protected static function booted()
     {
         static::creating(function ($category) {
-            $category->slug = Str::slug($category->name);
+            if (empty($category->slug)) {
+                $category->slug = Str::slug($category->name);
+            }
+        });
+
+        static::updating(function ($category) {
+            if ($category->isDirty('name') && empty($category->slug)) {
+                $category->slug = Str::slug($category->name);
+            }
         });
     }
 }

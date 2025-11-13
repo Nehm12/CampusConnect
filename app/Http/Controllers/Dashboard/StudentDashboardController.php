@@ -67,7 +67,6 @@ class StudentDashboardController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::id()],
         ]);
 
-        // Utilisez User::find() au lieu de Auth::user()
         $user = User::find(Auth::id());
         
         $user->firstname = $request->firstname;
@@ -103,44 +102,50 @@ class StudentDashboardController extends Controller
     {
         $query = Announcement::with('user')->latest();
 
-        // Recherche par titre ou contenu seulement (pas de filtrage par catégorie)
+        // Recherche par titre ou description
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('content', 'like', '%' . $request->search . '%');
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
             });
         }
 
-        $announcements = $query->paginate(10);
+        $announcements = $query->paginate(10)->appends($request->all());
 
-        // Statistiques simplifiées (sans catégories)
+        // Statistiques
         $totalAnnouncements = Announcement::count();
         $todayAnnouncements = Announcement::whereDate('created_at', today())->count();
         $weekAnnouncements = Announcement::where('created_at', '>=', now()->subDays(7))->count();
-        
-        // Pas d'annonces urgentes ni épinglées (colonnes inexistantes)
-        $urgentAnnouncements = 0;
-        $pinnedAnnouncements = collect(); // Collection vide
 
         return view('dashboard.etudiant.announcements', compact(
             'announcements',
             'totalAnnouncements',
             'todayAnnouncements',
-            'urgentAnnouncements',
-            'weekAnnouncements',
-            'pinnedAnnouncements'
+            'weekAnnouncements'
         ));
+    }
+
+    // ✅ MÉTHODE À AJOUTER
+    public function showAnnouncement($id)
+    {
+        // Récupérer l'annonce avec l'utilisateur associé
+        $announcement = Announcement::with('user')->findOrFail($id);
+        
+        // Récupérer 3 annonces récentes (sauf l'actuelle)
+        $recentAnnouncements = Announcement::with('user')
+            ->where('id', '!=', $id)
+            ->latest()
+            ->take(3)
+            ->get();
+        
+        return view('dashboard.etudiant.announcements-detail', compact('announcement', 'recentAnnouncements'));
     }
 
     public function rooms()
     {
-        // Récupérer toutes les salles
         $rooms = Room::latest()->get();
-        
-        // Récupérer tous les matériels
         $materials = Material::latest()->get();
 
-        // Statistiques basées sur les vraies colonnes
         $availableRooms = Room::count();
         $availableMaterials = Material::count();
         $myReservations = Reservation::where('user_id', Auth::id())->count();

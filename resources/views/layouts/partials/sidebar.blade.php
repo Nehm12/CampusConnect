@@ -59,7 +59,7 @@
                     </a>
                 </div>
 
-                @elseif(auth()->user()->role === 'teacher')
+            @elseif(auth()->user()->role === 'teacher')
                 {{-- Menu Enseignant --}}
                 <div class="space-y-2">
                     <div class="mb-6">
@@ -151,12 +151,12 @@
                         Utilisateurs
                     </a>
 
-                    <a href="{{ route('admin.annonces') }}" 
+                    <a href="{{ route('admin.announcements') }}" 
                        class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
-                              {{ request()->routeIs('admin.annonces') 
+                              {{ request()->routeIs('admin.announcements*') 
                                  ? 'bg-purple-100 text-purple-700 shadow-sm border-l-4 border-purple-500' 
                                  : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600 hover:shadow-sm' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.annonces') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.announcements*') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
                         </svg>
                         Annonces
@@ -164,32 +164,32 @@
 
                     <a href="{{ route('admin.reservations') }}" 
                        class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
-                              {{ request()->routeIs('admin.reservations') 
+                              {{ request()->routeIs('admin.reservations*') 
                                  ? 'bg-purple-100 text-purple-700 shadow-sm border-l-4 border-purple-500' 
                                  : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600 hover:shadow-sm' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.reservations') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.reservations*') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
                         Réservations
                     </a>
 
-                    <a href="{{ route('admin.ressources') }}" 
+                    <a href="{{ route('admin.ressources.index') }}" 
                        class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
-                              {{ request()->routeIs('admin.ressources') || request()->routeIs('admin.salles*') || request()->routeIs('admin.materiels*') 
+                              {{ request()->routeIs('admin.ressources*') || request()->routeIs('admin.rooms*') || request()->routeIs('admin.materials*') 
                                  ? 'bg-purple-100 text-purple-700 shadow-sm border-l-4 border-purple-500' 
                                  : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600 hover:shadow-sm' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.ressources') || request()->routeIs('admin.salles*') || request()->routeIs('admin.materiels*') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.ressources*') || request()->routeIs('admin.rooms*') || request()->routeIs('admin.materials*') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
                         Ressources
                     </a>
 
-                    <a href="{{ route('admin.stats') }}" 
+                    <a href="{{ route('admin.stats.index') }}" 
                        class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
-                              {{ request()->routeIs('admin.stats') 
+                              {{ request()->routeIs('admin.stats*') 
                                  ? 'bg-purple-100 text-purple-700 shadow-sm border-l-4 border-purple-500' 
                                  : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600 hover:shadow-sm' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.stats') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.stats*') ? 'text-purple-600' : 'text-gray-400 group-hover:text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                         Statistiques
@@ -252,8 +252,7 @@
                 </button>
             </div>
 
-            {{-- Navigation for Mobile (same styling as desktop) --}}
-            {{-- Navigation for Mobile (same styling as desktop) --}}
+            {{-- Navigation for Mobile --}}
             <nav class="flex-1 overflow-y-auto py-6 px-4">
                 @if(auth()->user()->role === 'student')
                     <div class="space-y-2">
@@ -374,7 +373,7 @@
                             Utilisateurs
                         </a>
 
-                        <a href="{{ route('admin.annonces') }}" 
+                        <a href="{{ route('admin.announcements') }}" 
                            class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200"
                            onclick="document.getElementById('mobile-sidebar').classList.add('hidden')">
                             <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -392,7 +391,7 @@
                             Réservations
                         </a>
 
-                        <a href="{{ route('admin.ressources') }}" 
+                        <a href="{{ route('admin.ressources.index') }}" 
                            class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200"
                            onclick="document.getElementById('mobile-sidebar').classList.add('hidden')">
                             <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,7 +400,7 @@
                             Ressources
                         </a>
 
-                        <a href="{{ route('admin.stats') }}" 
+                        <a href="{{ route('admin.stats.index') }}" 
                            class="group flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200"
                            onclick="document.getElementById('mobile-sidebar').classList.add('hidden')">
                             <svg class="w-5 h-5 mr-3 text-gray-400 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

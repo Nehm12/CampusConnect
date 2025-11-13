@@ -116,8 +116,9 @@
                             <h3 class="text-xl font-bold text-gray-900 mb-3">
                                 {{ $announcement->title ?? 'Titre non disponible' }}
                             </h3>
+                            {{-- ✅ CORRECTION: content → description --}}
                             <p class="text-gray-600 mb-4 leading-relaxed">
-                                {{ Str::limit($announcement->content ?? 'Contenu non disponible', 150) }}
+                                {{ Str::limit($announcement->description ?? 'Contenu non disponible', 150) }}
                             </p>
                             <div class="flex items-center text-sm text-gray-500">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,11 +129,13 @@
                                 </span>
                             </div>
                         </div>
-                        <button class="ml-6 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                        {{-- ✅ Bouton cliquable pour voir les détails --}}
+                        <a href="{{ route('etudiant.announcements.show', $announcement->id) }}" 
+                           class="ml-6 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
-                        </button>
+                        </a>
                     </div>
                 </div>
             @empty

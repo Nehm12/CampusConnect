@@ -5,6 +5,7 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
         {{-- Header --}}
         <div class="mb-8">
             <div class="flex items-center justify-between">
@@ -16,7 +17,7 @@
         </div>
 
         {{-- Statistiques --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <div class="flex items-center">
                     <div class="p-3 bg-blue-100 rounded-lg">
@@ -35,7 +36,7 @@
                 <div class="flex items-center">
                     <div class="p-3 bg-green-100 rounded-lg">
                         <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
                     <div class="ml-4">
@@ -49,123 +50,104 @@
                 <div class="flex items-center">
                     <div class="p-3 bg-purple-100 rounded-lg">
                         <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Cette Semaine</p>
+                        <p class="text-sm font-medium text-gray-600">Cette semaine</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $weekAnnouncements ?? 0 }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <div class="flex items-center">
-                    <div class="p-3 bg-orange-100 rounded-lg">
-                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Mes Lectures</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $totalAnnouncements ?? 0 }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Recherche seulement (pas de filtrage par catégorie) --}}
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
+        {{-- Barre de recherche --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
             <form method="GET" action="{{ route('etudiant.announcements') }}">
-                <div class="flex gap-4">
-                    <div class="flex-1">
-                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>
-                        <input 
-                            type="text" 
-                            name="search" 
-                            id="search"
-                            value="{{ request('search') }}"
-                            placeholder="Rechercher dans le titre ou le contenu..." 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
                     </div>
-                    
-                    <div class="flex items-end">
-                        <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                            Rechercher
-                        </button>
-                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
+                           placeholder="Rechercher une annonce...">
                 </div>
             </form>
         </div>
 
         {{-- Liste des annonces --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-            <div class="px-6 py-4 border-b border-gray-100">
-                <h2 class="text-xl font-semibold text-gray-900">Toutes les Annonces</h2>
-            </div>
-            
-            <div class="divide-y divide-gray-100">
-                @forelse($announcements ?? [] as $announcement)
-                    <div class="p-6 hover:bg-gray-50 transition-colors duration-200">
-                        <div class="flex items-start justify-between">
+        <div class="space-y-6">
+            @forelse($announcements as $announcement)
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
-                                <div class="flex items-center space-x-2 mb-3">
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
-                                        Annonce
-                                    </span>
-                                    <span class="text-gray-500 text-xs">{{ $announcement->created_at->diffForHumans() }}</span>
-                                </div>
-                                
-                                <h3 class="text-lg font-semibold text-gray-800 mb-3">
-                                    {{ $announcement->title ?? 'Titre non disponible' }}
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                    📢 {{ $announcement->title }}
                                 </h3>
-                                
-                                <p class="text-gray-600 mb-4 leading-relaxed">
-                                    {{ $announcement->content ?? 'Contenu non disponible' }}
-                                </p>
-                                
-                                <div class="flex items-center text-sm text-gray-500">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>
-                                    Publié par {{ $announcement->user->firstname ?? 'Utilisateur' }} {{ $announcement->user->lastname ?? '' }}
-                                    @if(isset($announcement->user->role))
-                                        <span class="ml-2 px-2 py-1 text-xs rounded-full 
-                                            {{ $announcement->user->role === 'teacher' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700' }}">
-                                            {{ $announcement->user->role === 'teacher' ? 'Enseignant' : ucfirst($announcement->user->role) }}
-                                        </span>
-                                    @endif
+                                <div class="flex items-center text-sm text-gray-500 space-x-4">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                        {{ $announcement->user ? $announcement->user->firstname . ' ' . $announcement->user->lastname : 'Administrateur' }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        {{ $announcement->created_at->format('d/m/Y à H:i') }}
+                                    </span>
                                 </div>
-                            </div>
-                            
-                            <div class="ml-6 flex-shrink-0">
-                                <button class="text-blue-600 hover:text-blue-700">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </button>
                             </div>
                         </div>
+                        
+                        {{-- ✅ Description limitée à 200 caractères --}}
+                        <div class="prose max-w-none text-gray-700 mb-4">
+                            @if($announcement->description)
+                                <p>{{ Str::limit($announcement->description, 200) }}</p>
+                            @else
+                                <p class="text-gray-400 italic">Contenu indisponible</p>
+                            @endif
+                        </div>
+
+                        {{-- ✅ Bouton "Voir les détails" --}}
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                            <span class="text-xs text-gray-500">
+                                📅 Publié {{ $announcement->created_at->diffForHumans() }}
+                            </span>
+                            <a href="{{ route('etudiant.announcements.show', $announcement->id) }}" 
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Voir les détails
+                            </a>
+                        </div>
                     </div>
-                @empty
-                    <div class="p-12 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                </div>
+            @empty
+                <div class="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
                         </svg>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune annonce trouvée</h3>
-                        <p class="text-gray-500">Il n'y a pas d'annonces correspondant à vos critères de recherche.</p>
                     </div>
-                @endforelse
-            </div>
-            
-            {{-- Pagination --}}
-            @if(isset($announcements) && method_exists($announcements, 'links'))
-                <div class="px-6 py-4 border-t border-gray-100">
-                    {{ $announcements->links() }}
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucune annonce</h3>
+                    <p class="text-gray-500">Aucune annonce n'est disponible pour le moment</p>
                 </div>
-            @endif
+            @endforelse
         </div>
+
+        {{-- Pagination --}}
+        @if($announcements->hasPages())
+            <div class="mt-8">
+                {{ $announcements->links() }}
+            </div>
+        @endif
     </div>
 </div>
 @endsection

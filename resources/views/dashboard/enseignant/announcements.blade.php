@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'Mes Annonces - Enseignant')
@@ -108,22 +109,14 @@
                                     @endif
                                 </div>
                                 <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $announcement->title }}</h3>
-                                <p class="text-gray-600 mb-4">{{ Str::limit($announcement->content, 150) }}</p>
+                                <p class="text-gray-600 mb-4">{{ Str::limit($announcement->description, 150) }}</p>
                                 <div class="flex items-center space-x-4 text-sm text-gray-500">
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                        {{ $announcement->views ?? 0 }} vues
-                                    </div>
-                                    <span>•</span>
                                     <span>{{ $announcement->created_at->format('d/m/Y à H:i') }}</span>
                                 </div>
                             </div>
                             <div class="flex space-x-2 ml-4">
                                 <button 
-                                    onclick="editAnnouncement({{ $announcement->id }}, '{{ $announcement->title }}', `{{ $announcement->content }}`, {{ $announcement->category_id ?? 'null' }})"
+                                    onclick="editAnnouncement({{ $announcement->id }}, '{{ addslashes($announcement->title) }}', `{{ addslashes($announcement->description) }}`, {{ $announcement->category_id ?? 'null' }})"
                                     class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 rounded hover:bg-blue-50 transition-colors duration-200">
                                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
@@ -131,7 +124,7 @@
                                     Modifier
                                 </button>
                                 <button 
-                                    onclick="deleteAnnouncement({{ $announcement->id }}, '{{ $announcement->title }}')"
+                                    onclick="deleteAnnouncement({{ $announcement->id }}, '{{ addslashes($announcement->title) }}')"
                                     class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1 rounded hover:bg-red-50 transition-colors duration-200">
                                     <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -201,8 +194,8 @@
                     </div>
                     
                     <div>
-                        <label for="content" class="block text-sm font-medium text-gray-700 mb-2">Contenu de l'annonce</label>
-                        <textarea id="content" name="content" rows="6" required 
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description de l'annonce</label>
+                        <textarea id="description" name="description" rows="6" required 
                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                   placeholder="Rédigez le contenu de votre annonce ici..."></textarea>
                     </div>
@@ -263,8 +256,8 @@
                     </div>
                     
                     <div>
-                        <label for="edit_content" class="block text-sm font-medium text-gray-700 mb-2">Contenu de l'annonce</label>
-                        <textarea id="edit_content" name="content" rows="6" required 
+                        <label for="edit_description" class="block text-sm font-medium text-gray-700 mb-2">Description de l'annonce</label>
+                        <textarea id="edit_description" name="description" rows="6" required 
                                   class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
                     </div>
                 </div>
@@ -286,9 +279,9 @@
 </div>
 
 <script>
-function editAnnouncement(id, title, content, categoryId) {
+function editAnnouncement(id, title, description, categoryId) {
     document.getElementById('edit_title').value = title;
-    document.getElementById('edit_content').value = content;
+    document.getElementById('edit_description').value = description;
     document.getElementById('edit_category_id').value = categoryId || '';
     document.getElementById('editAnnouncementForm').action = `/enseignant/announcements/${id}`;
     document.getElementById('editAnnouncementModal').classList.remove('hidden');

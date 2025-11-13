@@ -78,10 +78,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/announcements', [StudentDashboardController::class, 'announcements'])->name('announcements');
         Route::get('/annonces', [StudentDashboardController::class, 'announcements'])->name('annonces'); // Alias français
         
-        Route::get('/announcements/{id}', function($id) {
-            return view('dashboard.etudiant.announcements-detail', compact('id'));
-        })->name('announcements.show');
+       
         
+         // ✅ Ajoutez cette ligne
+        Route::get('/announcements/{id}', [StudentDashboardController::class, 'showAnnouncement'])->name('announcements.show');
+    
         Route::get('/annonces/{id}', function($id) {
             return view('dashboard.etudiant.annonces-detail', compact('id'));
         })->name('annonces.show'); // Alias français
@@ -101,92 +102,96 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | Routes Enseignant
     |--------------------------------------------------------------------------
     */
-    Route::prefix('enseignant')->name('enseignant.')->middleware('role:teacher')->group(function () {
-        // Dashboard enseignant avec données
-        Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
-        
-        // Salles et matériels pour enseignants avec réservation
-        Route::get('/rooms', [TeacherDashboardController::class, 'rooms'])->name('rooms');
-        Route::get('/salles', [TeacherDashboardController::class, 'rooms'])->name('salles'); // Alias français
-        
-        // Annonces enseignant - CRUD complet
-        Route::get('/announcements', [TeacherDashboardController::class, 'announcements'])->name('announcements');
-        Route::post('/announcements', [TeacherDashboardController::class, 'storeAnnouncement'])->name('announcements.store');
-        Route::put('/announcements/{id}', [TeacherDashboardController::class, 'updateAnnouncement'])->name('announcements.update');
-        Route::delete('/announcements/{id}', [TeacherDashboardController::class, 'destroyAnnouncement'])->name('announcements.destroy');
-        Route::get('/annonces', [TeacherDashboardController::class, 'announcements'])->name('annonces'); // Alias français
-        
-        // Réservations enseignant - CRUD complet
-        Route::get('/reservations', [TeacherDashboardController::class, 'reservations'])->name('reservations');
-        Route::post('/reservations', [TeacherDashboardController::class, 'storeReservation'])->name('reservations.store');
-        Route::put('/reservations/{id}', [TeacherDashboardController::class, 'updateReservation'])->name('reservations.update');
-        Route::delete('/reservations/{id}', [TeacherDashboardController::class, 'destroyReservation'])->name('reservations.destroy');
-        
-        // Routes spécifiques pour les réservations
-        Route::post('/reservations/room/{room}', [TeacherDashboardController::class, 'reserveRoom'])->name('reservations.room');
-        Route::post('/reservations/material/{material}', [TeacherDashboardController::class, 'reserveMaterial'])->name('reservations.material');
-        Route::get('/reservations/{id}/cancel', [TeacherDashboardController::class, 'cancelReservation'])->name('reservations.cancel');
-        
-        // Vérification de disponibilité (AJAX)
-        Route::get('/check-availability', [TeacherDashboardController::class, 'checkAvailability'])->name('check.availability');
-        
-        // Profil enseignant
-        Route::get('/profil', [TeacherDashboardController::class, 'profil'])->name('profil');
-        Route::get('/profil/edit', [TeacherDashboardController::class, 'editProfil'])->name('profil.edit');
-        Route::put('/profil', [TeacherDashboardController::class, 'updateProfil'])->name('profil.update');
-        Route::put('/profil/password', [TeacherDashboardController::class, 'updatePassword'])->name('profil.password');
-    });
+ // Routes Enseignant - Réservations (CORRIGÉES)
+Route::middleware(['auth', 'role:teacher'])->prefix('enseignant')->name('enseignant.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
+    
+    // Salles et matériels
+    Route::get('/rooms', [TeacherDashboardController::class, 'rooms'])->name('rooms');
+    Route::get('/salles', [TeacherDashboardController::class, 'rooms'])->name('salles');
+    
+    // Réservations - CRUD complet
+    Route::get('/reservations', [TeacherDashboardController::class, 'reservations'])->name('reservations');
+    Route::post('/reservations', [TeacherDashboardController::class, 'storeReservation'])->name('reservations.store');
+    Route::get('/reservations/{id}', [TeacherDashboardController::class, 'showReservation'])->name('reservations.show');
+    Route::get('/reservations/{id}/edit', [TeacherDashboardController::class, 'editReservation'])->name('reservations.edit');
+    Route::put('/reservations/{id}', [TeacherDashboardController::class, 'updateReservation'])->name('reservations.update');
+    Route::patch('/reservations/{id}/cancel', [TeacherDashboardController::class, 'cancelReservation'])->name('reservations.cancel');
+    Route::delete('/reservations/{id}', [TeacherDashboardController::class, 'destroyReservation'])->name('reservations.destroy');
+    
+    // Annonces
+    Route::get('/announcements', [TeacherDashboardController::class, 'announcements'])->name('announcements');
+    Route::post('/announcements', [TeacherDashboardController::class, 'storeAnnouncement'])->name('announcements.store');
+    Route::put('/announcements/{id}', [TeacherDashboardController::class, 'updateAnnouncement'])->name('announcements.update');
+    Route::delete('/announcements/{id}', [TeacherDashboardController::class, 'destroyAnnouncement'])->name('announcements.destroy');
+    Route::get('/annonces', [TeacherDashboardController::class, 'announcements'])->name('annonces');
+    
+    // Profil
+    Route::get('/profil', [TeacherDashboardController::class, 'profil'])->name('profil');
+    Route::get('/profil/edit', [TeacherDashboardController::class, 'editProfil'])->name('profil.edit');
+    Route::put('/profil', [TeacherDashboardController::class, 'updateProfil'])->name('profil.update');
+    Route::put('/profil/password', [TeacherDashboardController::class, 'updatePassword'])->name('profil.password');
+});
     
     /*
     |--------------------------------------------------------------------------
     | Routes Admin
     |--------------------------------------------------------------------------
     */
-    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
-        // Dashboard admin avec données
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        
-        // Gestion des utilisateurs
-        Route::get('/users', function() {
-            return view('dashboard.admin.users.index');
-        })->name('users.index');
-        
-        Route::get('/users/create', function() {
-            return view('dashboard.admin.users.create');
-        })->name('users.create');
-        
-        Route::get('/users/{id}/edit', function($id) {
-            return view('dashboard.admin.users.edit', compact('id'));
-        })->name('users.edit');
-        
-        // Validation des réservations
-        Route::get('/reservations', function() {
-            return view('dashboard.admin.reservations');
-        })->name('reservations');
-        
-        // Gestion des annonces
-        Route::get('/announcements', function() {
-            return view('dashboard.admin.announcements');
-        })->name('announcements');
-        
-        Route::get('/annonces', function() {
-            return view('dashboard.admin.annonces');
-        })->name('annonces'); // Alias français
-        
-        // Gestion des ressources
-        Route::get('/resources', function() {
-            return view('dashboard.admin.resources');
-        })->name('resources');
-        
-        Route::get('/ressources', function() {
-            return view('dashboard.admin.ressources');
-        })->name('ressources'); // Alias français
-        
-        // Statistiques
-        Route::get('/stats', function() {
-            return view('dashboard.admin.stats');
-        })->name('stats');
-    });
+
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    // Profil
+    Route::get('/profil', [AdminDashboardController::class, 'profil'])->name('profil');
+    Route::put('/profil', [AdminDashboardController::class, 'updateProfil'])->name('profil.update');
+    
+    // Utilisateurs - TOUT dans un seul fichier
+    Route::get('/users', [AdminDashboardController::class, 'users'])->name('users.index');
+    Route::post('/users/store', [AdminDashboardController::class, 'storeUser'])->name('users.store');
+    Route::put('/users/{id}', [AdminDashboardController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{id}', [AdminDashboardController::class, 'destroyUser'])->name('users.destroy');
+    
+     // Gestion des annonces
+     Route::get('/announcements', [AdminDashboardController::class, 'announcements'])->name('announcements');
+     Route::post('/announcements', [AdminDashboardController::class, 'storeAnnouncement'])->name('announcements.store');
+     Route::put('/announcements/{id}', [AdminDashboardController::class, 'updateAnnouncement'])->name('announcements.update');
+     Route::delete('/announcements/{id}', [AdminDashboardController::class, 'destroyAnnouncement'])->name('announcements.destroy');
+ 
+     // Réservations
+     Route::get('/reservations', [AdminDashboardController::class, 'reservations'])->name('reservations');
+     Route::put('/reservations/{id}/approve', [AdminDashboardController::class, 'approveReservation'])->name('reservations.approve');
+     Route::put('/reservations/{id}/reject', [AdminDashboardController::class, 'rejectReservation'])->name('reservations.reject');
+     Route::delete('/reservations/{id}', [AdminDashboardController::class, 'destroyReservation'])->name('reservations.destroy');
+     
+     // Ressources
+     Route::get('/ressources', [AdminDashboardController::class, 'ressources'])->name('ressources');
+     
+     // Salles
+     Route::post('/rooms', [AdminDashboardController::class, 'storeRoom'])->name('rooms.store');
+     Route::put('/rooms/{id}', [AdminDashboardController::class, 'updateRoom'])->name('rooms.update');
+     Route::delete('/rooms/{id}', [AdminDashboardController::class, 'destroyRoom'])->name('rooms.destroy');
+     
+     // Matériels
+     Route::post('/materials', [AdminDashboardController::class, 'storeMaterial'])->name('materials.store');
+     Route::put('/materials/{id}', [AdminDashboardController::class, 'updateMaterial'])->name('materials.update');
+     Route::delete('/materials/{id}', [AdminDashboardController::class, 'destroyMaterial'])->name('materials.destroy');
+ 
+     /////
+    // Ressources (Salles & Matériels) - TOUT dans un seul fichier
+    Route::get('/ressources', [AdminDashboardController::class, 'ressources'])->name('ressources.index');
+    Route::post('/rooms/store', [AdminDashboardController::class, 'storeRoom'])->name('rooms.store');
+    Route::put('/rooms/{id}', [AdminDashboardController::class, 'updateRoom'])->name('rooms.update');
+    Route::delete('/rooms/{id}', [AdminDashboardController::class, 'destroyRoom'])->name('rooms.destroy');
+    Route::post('/materials/store', [AdminDashboardController::class, 'storeMaterial'])->name('materials.store');
+    Route::put('/materials/{id}', [AdminDashboardController::class, 'updateMaterial'])->name('materials.update');
+    Route::delete('/materials/{id}', [AdminDashboardController::class, 'destroyMaterial'])->name('materials.destroy');
+    // Statistiques
+    Route::get('/stats', [AdminDashboardController::class, 'stats'])->name('stats.index');
+    ////
+});
     
     // Routes générales de ressources (avec contrôleurs appropriés selon le rôle)
     Route::resource('announcements', AnnouncementController::class);
