@@ -1,3 +1,9 @@
+/**
+ * Application Stylesheet
+ *
+ * Import Tailwind CSS and configure custom theme
+ */
+
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
