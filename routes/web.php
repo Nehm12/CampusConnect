@@ -64,7 +64,7 @@ Route::prefix('enseignant')->group(function () {
         return view('enseignant.announcements.edit');
     })->name('enseignant.announcements.edit');
 
-    Route::post('/show', function () {
+    Route::get('/show', function () {
         return view('enseignant.announcements.show');
     })->name('enseignant.announcements.show');
 
@@ -72,12 +72,19 @@ Route::prefix('enseignant')->group(function () {
 
 //Routes pour étudiants
 
-Route::prefix('etudiant')->group(function () {
+Route::prefix('student')->group(function () {
     // Page des annonces
     Route::get('/', function () {
-        return view('etudiant.announcements.index');
-    })->name('etudiant.announcements.index');
+        return view('student.index');
+    })->name('student.dashboard');
 
+    Route::get('/announcements', function () {
+        return view('student.announcements.index');
+    })->name('student.announcements.index');
+
+    Route::get('/announcements/show', function () {
+        return view('student.announcements.show');
+    })->name('student.announcements.show');
 });
 
 Route::get('/dashboard', function () {
