@@ -23,13 +23,49 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $firstname = fake()->firstName();
+        $lastname = fake()->lastName();
+
         return [
-            'name' => fake()->name(),
+            'firstname' => $firstname,
+            'lastname' => $lastname,
             'email' => fake()->unique()->safeEmail(),
+            'telephone' => fake()->phoneNumber(),
+            'role' => fake()->randomElement(['etudiant', 'enseignant', 'admin']),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * État pour un étudiant
+     */
+    public function student()
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'etudiant',
+        ]);
+    }
+
+    /**
+     * État pour un enseignant
+     */
+    public function teacher()
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'enseignant',
+        ]);
+    }
+
+    /**
+     * État pour un admin
+     */
+    public function admin()
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+        ]);
     }
 
     /**
