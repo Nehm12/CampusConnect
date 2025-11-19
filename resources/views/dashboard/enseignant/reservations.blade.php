@@ -30,7 +30,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">📅 Mes Réservations</h1>
-                    <p class="mt-2 text-gray-600">Gérez vos réservations de salles et matériels</p>
+                    <p class="mt-2 text-gray-600">Consultez vos réservations de salles et matériels</p>
                 </div>
                 <div class="flex items-center space-x-4">
                     <button 
@@ -206,6 +206,10 @@
                                             📋 {{ $reservation->reference }}
                                         </span>
                                     @endif
+                                    {{-- ✅ Badge "Non modifiable" --}}
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
+                                        🔒 Non modifiable
+                                    </span>
                                 </div>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
@@ -250,14 +254,12 @@
                             </div>
                             
                             <div class="flex flex-col space-y-2 ml-4">
-                                @if(in_array($reservation->status, ['pending', 'approved']))
-                                    <button 
-                                        onclick="openEditModal({{ $reservation->id }})"
-                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 text-center">
-                                        ✏️ Modifier
-                                    </button>
+                                {{-- ❌ SUPPRIMER LE BOUTON "MODIFIER" --}}
+                                
+                                {{-- ✅ GARDER uniquement "ANNULER" (si status = pending) --}}
+                                @if($reservation->status === 'pending')
                                     <form action="{{ route('enseignant.reservations.cancel', $reservation->id) }}" method="POST" 
-                                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');">
+                                          onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?\n\nCette action est définitive.');">
                                         @csrf
                                         @method('PATCH')
                                         <button type="submit"
@@ -265,7 +267,14 @@
                                             ❌ Annuler
                                         </button>
                                     </form>
+                                @else
+                                    {{-- Badge si déjà traitée --}}
+                                    <div class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium text-center">
+                                        {{ $reservation->status == 'approved' ? '✅ Confirmée' : 
+                                           ($reservation->status == 'rejected' ? '❌ Rejetée' : '🚫 Annulée') }}
+                                    </div>
                                 @endif
+                                
                                 <button 
                                     onclick="openDetailsModal({{ $reservation->id }})"
                                     class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors duration-200 text-center">
@@ -309,7 +318,7 @@
     </div>
 </div>
 
-{{-- Modal Détails --}}
+{{-- Modal Détails (GARDER) --}}
 <div id="detailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-xl bg-white mb-10">
         <div class="flex items-center justify-between border-b pb-4 mb-6">
@@ -320,37 +329,10 @@
     </div>
 </div>
 
-{{-- Modal Modification --}}
-<div id="editModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-10 mx-auto p-5 border w-11/12 max-w-3xl shadow-lg rounded-xl bg-white mb-10">
-        <div class="flex items-center justify-between border-b pb-4 mb-6">
-            <h3 class="text-2xl font-bold text-gray-900">✏️ Modifier la Réservation</h3>
-            <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 text-3xl font-bold leading-none">×</button>
-        </div>
-        
-        <form id="editForm" method="POST" action="" class="space-y-6">
-            @csrf
-            @method('PUT')
-            <div id="editContent"></div>
-            <div class="flex justify-end space-x-4 pt-6 border-t">
-                <button type="button" onclick="closeEditModal()"
-                        class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                    Annuler
-                </button>
-                <button type="submit" 
-                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    💾 Enregistrer
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+{{-- ❌ SUPPRIMER COMPLÈTEMENT LE MODAL DE MODIFICATION --}}
 
 <script>
-// Fonctions de filtrage
+// Fonctions de filtrage (GARDER)
 function filterReservations() {
     const statusFilter = document.getElementById('statusFilter').value;
     const typeFilter = document.getElementById('typeFilter').value;
@@ -386,7 +368,7 @@ function resetFilters() {
     filterReservations();
 }
 
-// Utilitaires
+// Utilitaires (GARDER)
 function formatDateTime(dateTime) {
     return new Date(dateTime).toLocaleDateString('fr-FR', { 
         year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
@@ -404,11 +386,7 @@ function getStatusText(status) {
     return texts[status] || status;
 }
 
-function calculateDuration(startTime, endTime) {
-    return Math.round((new Date(`2000-01-01 ${endTime}`) - new Date(`2000-01-01 ${startTime}`)) / 3600000);
-}
-
-// Modal Détails
+// Modal Détails (GARDER)
 function openDetailsModal(reservationId) {
     const modal = document.getElementById('detailsModal');
     const content = document.getElementById('detailsContent');
@@ -456,121 +434,26 @@ function openDetailsModal(reservationId) {
                 <div class="text-right"><p class="text-sm text-gray-600">Statut</p><span class="px-3 py-1 text-xs font-semibold rounded-full ${getStatusClass(data.status)}">${getStatusText(data.status)}</span></div>
             </div>
         </div>
+        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-gray-400">
+            <p class="text-sm text-gray-700">
+                <strong>ℹ️ Information:</strong> Les réservations ne peuvent pas être modifiées après leur création. Vous pouvez uniquement annuler une réservation en attente.
+            </p>
+        </div>
     `;
     modal.classList.remove('hidden');
 }
 
 function closeDetailsModal() { document.getElementById('detailsModal').classList.add('hidden'); }
 
-// ✅ Modal Modification - CORRIGÉ
-function openEditModal(reservationId) {
-    const modal = document.getElementById('editModal');
-    const form = document.getElementById('editForm');
-    const content = document.getElementById('editContent');
-    
-    // ✅ CORRECTION: Utiliser url() de Blade
-    const baseUrl = "{{ url('enseignant/reservations') }}";
-    form.action = baseUrl + '/' + reservationId;
-    console.log('✅ Form action:', form.action); // Debug
-    
-    let data = null;
-    document.querySelectorAll('.reservation-item').forEach(item => {
-        try {
-            const reservationData = JSON.parse(item.dataset.reservation);
-            if (reservationData.id === reservationId) data = reservationData;
-        } catch (e) { console.error('Erreur parsing:', e); }
-    });
-    
-    if (!data) { alert('⚠️ Erreur lors du chargement des données'); return; }
-    
-    const startDateTime = new Date(data.start_time);
-    const endDateTime = new Date(data.end_time);
-    const startDate = startDateTime.toISOString().split('T')[0];
-    const startTime = startDateTime.toTimeString().substring(0, 5);
-    const endTime = endDateTime.toTimeString().substring(0, 5);
-    const duration = calculateDuration(startTime, endTime);
-    
-    content.innerHTML = `
-        <div class="bg-blue-50 p-4 rounded-lg mb-4">
-            <p class="text-sm font-medium text-blue-900">Réservation de: <strong>${data.room ? data.room.name : 'Matériel'}</strong></p>
-            <p class="text-xs text-blue-700 mt-1">Référence: ${data.reference}</p>
-        </div>
-        <div class="space-y-4">
-            <div>
-                <label for="edit_reservation_date" class="block text-sm font-medium text-gray-700 mb-2">📅 Date <span class="text-red-500">*</span></label>
-                <input type="date" id="edit_reservation_date" name="reservation_date" value="${startDate}" required min="${new Date().toISOString().split('T')[0]}"
-                       class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="edit_start_time" class="block text-sm font-medium text-gray-700 mb-2">⏰ Heure début <span class="text-red-500">*</span></label>
-                    <input type="time" id="edit_start_time" name="start_time" value="${startTime}" required onchange="updateEditEndTime()"
-                           class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="edit_end_time" class="block text-sm font-medium text-gray-700 mb-2">⏱️ Heure fin</label>
-                    <input type="time" id="edit_end_time" name="end_time" value="${endTime}" required readonly
-                           class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 cursor-not-allowed">
-                </div>
-            </div>
-            <div>
-                <label for="edit_duration" class="block text-sm font-medium text-gray-700 mb-2">⏳ Durée <span class="text-red-500">*</span></label>
-                <select id="edit_duration" name="duration" required onchange="updateEditEndTime()"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500">
-                    <option value="1" ${duration == 1 ? 'selected' : ''}>1 heure</option>
-                    <option value="2" ${duration == 2 ? 'selected' : ''}>2 heures</option>
-                    <option value="3" ${duration == 3 ? 'selected' : ''}>3 heures</option>
-                    <option value="4" ${duration == 4 ? 'selected' : ''}>4 heures (demi-journée)</option>
-                    <option value="8" ${duration == 8 ? 'selected' : ''}>8 heures (journée complète)</option>
-                </select>
-            </div>
-            <div>
-                <label for="edit_purpose" class="block text-sm font-medium text-gray-700 mb-2">💡 Motif <span class="text-red-500">*</span></label>
-                <textarea id="edit_purpose" name="purpose" rows="4" required maxlength="500"
-                          class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 resize-none"
-                          placeholder="Ex: Cours de programmation...">${data.purpose || ''}</textarea>
-                <p class="text-xs text-gray-500 mt-1">Maximum 500 caractères</p>
-            </div>
-            ${data.materials && data.materials.length > 0 ? `
-                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                    <p class="text-sm font-semibold text-blue-900 mb-2">📦 Matériels réservés:</p>
-                    <ul class="text-sm text-blue-800 space-y-1">
-                        ${data.materials.map(m => `<li class="flex items-center"><svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>${m.name} (Qté: ${m.pivot.quantity})</li>`).join('')}
-                    </ul>
-                    <p class="text-xs text-blue-600 mt-2">ℹ️ Les matériels ne peuvent pas être modifiés ici</p>
-                </div>
-            ` : ''}
-            <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
-                <p class="text-sm text-yellow-800"><strong>⚠️ Important:</strong> Après modification, votre réservation sera remise en statut "En attente".</p>
-            </div>
-        </div>
-    `;
-    modal.classList.remove('hidden');
-}
-
-function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
-
-function updateEditEndTime() {
-    const startTime = document.getElementById('edit_start_time').value;
-    const duration = parseInt(document.getElementById('edit_duration').value);
-    
-    if (startTime && duration) {
-        const [hours, minutes] = startTime.split(':');
-        const startDate = new Date();
-        startDate.setHours(parseInt(hours), parseInt(minutes));
-        startDate.setHours(startDate.getHours() + duration);
-        
-        document.getElementById('edit_end_time').value = 
-            `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`;
-    }
-}
+// ❌ SUPPRIMER TOUTES LES FONCTIONS DE MODIFICATION
+// function openEditModal(...) { ... }
+// function closeEditModal() { ... }
+// function updateEditEndTime() { ... }
 
 // Fermer modals en cliquant dehors
 window.onclick = function(event) {
     const detailsModal = document.getElementById('detailsModal');
-    const editModal = document.getElementById('editModal');
     if (event.target == detailsModal) closeDetailsModal();
-    if (event.target == editModal) closeEditModal();
 }
 </script>
 @endsection

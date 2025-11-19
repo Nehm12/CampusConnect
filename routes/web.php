@@ -123,8 +123,6 @@ Route::middleware(['auth', 'role:teacher'])->prefix('enseignant')->name('enseign
     // Annonces
     Route::get('/announcements', [TeacherDashboardController::class, 'announcements'])->name('announcements');
     Route::post('/announcements', [TeacherDashboardController::class, 'storeAnnouncement'])->name('announcements.store');
-    Route::put('/announcements/{id}', [TeacherDashboardController::class, 'updateAnnouncement'])->name('announcements.update');
-    Route::delete('/announcements/{id}', [TeacherDashboardController::class, 'destroyAnnouncement'])->name('announcements.destroy');
     Route::get('/annonces', [TeacherDashboardController::class, 'announcements'])->name('annonces');
     
     // Profil

@@ -46,13 +46,76 @@ class TeacherDashboardController extends Controller
 
     public function rooms()
     {
-        $rooms = Room::all();
+        // Récupérer toutes les salles avec leurs réservations
+        $rooms = Room::withCount([
+            'reservations as active_reservations_count' => function($query) {
+                $query->whereIn('status', ['pending', 'approved'])
+                      ->where('start_time', '<=', now())
+                      ->where('end_time', '>=', now());
+            }
+        ])->get();
+    
+        // Calculer la disponibilité de chaque salle
+        $rooms->each(function($room) {
+            // Vérifier si la salle est actuellement réservée
+            $currentReservation = Reservation::where('room_id', $room->id)
+                ->whereIn('status', ['pending', 'approved'])
+                ->where('start_time', '<=', now())
+                ->where('end_time', '>=', now())
+                ->first();
+            
+            $room->is_available = !$currentReservation;
+            $room->current_reservation = $currentReservation;
+    
+            // Prochaine réservation
+            $room->next_reservation = Reservation::where('room_id', $room->id)
+                ->whereIn('status', ['pending', 'approved'])
+                ->where('start_time', '>', now())
+                ->orderBy('start_time')
+                ->first();
+    
+            // Nombre total de réservations futures
+            $room->future_reservations_count = Reservation::where('room_id', $room->id)
+                ->whereIn('status', ['pending', 'approved'])
+                ->where('start_time', '>', now())
+                ->count();
+        });
+    
+        // Récupérer tous les matériels avec disponibilité réelle
         $materials = Material::where('quantity_total', '>', 0)->get();
-        $availableRooms = $rooms->count();
-        $availableMaterials = $materials->count();
+        
+        $materials->each(function($material) {
+            // Calculer la quantité actuellement réservée
+            $reservedQuantity = $material->reservations()
+                ->whereIn('status', ['pending', 'approved'])
+                ->where('start_time', '<=', now())
+                ->where('end_time', '>=', now())
+                ->sum('reservation_material.quantity');
+            
+            $material->available_quantity = max(0, $material->quantity_total - $reservedQuantity);
+            $material->reserved_quantity = $reservedQuantity;
+            $material->is_available = $material->available_quantity > 0;
+    
+            // Prochaine réservation
+            $material->next_reservation = $material->reservations()
+                ->whereIn('status', ['pending', 'approved'])
+                ->where('start_time', '>', now())
+                ->orderBy('start_time')
+                ->first();
+        });
+    
+        // Statistiques mises à jour
+        $availableRooms = $rooms->where('is_available', true)->count();
+        $availableMaterials = $materials->where('is_available', true)->count();
         $myReservationsCount = Reservation::where('user_id', Auth::id())->count();
-
-        return view('dashboard.enseignant.rooms', compact('rooms', 'materials', 'availableRooms', 'availableMaterials', 'myReservationsCount'));
+    
+        $stats = [
+            'available_rooms' => $availableRooms,
+            'available_materials' => $availableMaterials,
+            'my_reservations' => $myReservationsCount
+        ];
+    
+        return view('dashboard.enseignant.rooms', compact('rooms', 'materials', 'stats'));
     }
 
     /**
@@ -192,111 +255,8 @@ class TeacherDashboardController extends Controller
         return view('dashboard.enseignant.reservations-edit', compact('reservation', 'rooms', 'materials'));
     }
 
-    /**
-     * Mettre à jour une réservation
-     */
-    public function updateReservation(Request $request, $id)
-    {
-        $reservation = Reservation::where('id', $id)
-                                 ->where('user_id', Auth::id())
-                                 ->firstOrFail();
 
-        // Vérifier si la réservation peut être modifiée
-        if (!in_array($reservation->status, ['pending', 'approved'])) {
-            return redirect()->route('enseignant.reservations')
-                           ->with('error', 'Cette réservation ne peut plus être modifiée.');
-        }
 
-        $validated = $request->validate([
-            'room_id' => 'required|exists:rooms,id',
-            'start_time' => 'required|date|after_or_equal:now',
-            'end_time' => 'required|date|after:start_time',
-            'purpose' => 'required|string|max:500',
-            'material_ids' => 'nullable|array',
-            'material_ids.*' => 'exists:materials,id',
-            'quantities' => 'nullable|array',
-            'quantities.*' => 'integer|min:1'
-        ]);
-
-        // Vérifier les conflits (sauf cette réservation)
-        $conflict = Reservation::where('room_id', $validated['room_id'])
-            ->where('id', '!=', $id)
-            ->where(function($query) use ($validated) {
-                $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
-                      ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
-                      ->orWhere(function($q) use ($validated) {
-                          $q->where('start_time', '<=', $validated['start_time'])
-                            ->where('end_time', '>=', $validated['end_time']);
-                      });
-            })
-            ->whereIn('status', ['pending', 'approved'])
-            ->exists();
-
-        if ($conflict) {
-            return back()->withErrors(['room_id' => 'Cette salle est déjà réservée pour cette période.'])->withInput();
-        }
-
-        // Vérifier la disponibilité des matériels
-        if (!empty($validated['material_ids'])) {
-            foreach ($validated['material_ids'] as $index => $materialId) {
-                $quantity = $validated['quantities'][$index] ?? 1;
-                $material = Material::find($materialId);
-                
-                if (!$material || $material->quantity_total < $quantity) {
-                    return back()->withErrors(['material_ids' => "Quantité insuffisante pour le matériel {$material->name}."])->withInput();
-                }
-            }
-        }
-
-        // Mettre à jour la réservation
-        $reservation->update([
-            'room_id' => $validated['room_id'],
-            'start_time' => $validated['start_time'],
-            'end_time' => $validated['end_time'],
-            'purpose' => $validated['purpose'],
-            'status' => 'pending' // Repasser en attente après modification
-        ]);
-
-        // Synchroniser les matériels
-        if (!empty($validated['material_ids'])) {
-            $syncData = [];
-            foreach ($validated['material_ids'] as $index => $materialId) {
-                $quantity = $validated['quantities'][$index] ?? 1;
-                $syncData[$materialId] = ['quantity' => $quantity];
-            }
-            $reservation->materials()->sync($syncData);
-        } else {
-            $reservation->materials()->detach();
-        }
-
-        return redirect()->route('enseignant.reservations')
-                        ->with('success', 'Réservation mise à jour avec succès !');
-    }
-
-    /**
-     * Annuler une réservation
-     */
-    public function cancelReservation($id)
-    {
-        $reservation = Reservation::where('id', $id)
-                                 ->where('user_id', Auth::id())
-                                 ->firstOrFail();
-        
-        // Vérifier si la réservation peut être annulée
-        if (!in_array($reservation->status, ['pending', 'approved'])) {
-            return redirect()->route('enseignant.reservations')
-                           ->with('error', 'Cette réservation ne peut pas être annulée.');
-        }
-        
-        $reservation->update(['status' => 'cancelled']);
-        
-        return redirect()->route('enseignant.reservations')
-                       ->with('success', 'Réservation annulée avec succès !');
-    }
-
-    /**
-     * Afficher les détails d'une réservation
-     */
     public function showReservation($id)
     {
         $reservation = Reservation::where('id', $id)
@@ -369,39 +329,6 @@ class TeacherDashboardController extends Controller
                         ->with('success', 'Annonce créée avec succès !');
     }
 
-    public function updateAnnouncement(Request $request, $id)
-    {
-        $announcement = Announcement::where('id', $id)
-                                  ->where('user_id', Auth::id())
-                                  ->firstOrFail();
-        
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category_id' => 'nullable|exists:announcement_categories,id'
-        ]);
-        
-        $announcement->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-        ]);
-        
-        return redirect()->route('enseignant.announcements')
-                        ->with('success', 'Annonce mise à jour avec succès !');
-    }
-
-    public function destroyAnnouncement($id)
-    {
-        $announcement = Announcement::where('id', $id)
-                                  ->where('user_id', Auth::id())
-                                  ->firstOrFail();
-        
-        $announcement->delete();
-        
-        return redirect()->route('enseignant.announcements')
-                        ->with('success', 'Annonce supprimée avec succès !');
-    }
 
     public function profil()
     {
