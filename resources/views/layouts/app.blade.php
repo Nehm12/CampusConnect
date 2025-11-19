@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,10 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard - CampusConnect')</title>
 
-    {{-- ✅ AJOUTER ICI LE FAVICON --}}
-    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
-    
+    {{-- ✅ Favicon SVG inline (fonctionne immédiatement) --}}
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%232563eb' rx='20'/><text x='50' y='70' font-size='55' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'>CC</text></svg>">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
