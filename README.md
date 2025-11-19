@@ -58,8 +58,7 @@ npm install
 cp .env.example .env
 php artisan key:generate
 
-# 4. Start MySQL (via XAMPP/LARAGON/WAMP)
-# Make sure MySQL uses the password: 18junior
+# 4. Start MySQL (via XAMPP/LARAGON/WAMP) 
 
 # 5. Create the database
 mysql -u < your user name > < your password >
@@ -67,50 +66,21 @@ CREATE DATABASE CampusConnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE CampusConnect;
 EXIT;
 
-# 6. Create Laravel system tables
-php artisan session:table
-php artisan queue:table
-php artisan cache:table
-php artisan queue:failed-table
 
-# 7. Create main migrations
-php artisan make:migration add_role_to_users_table
-php artisan make:migration create_categories_table
-php artisan make:migration create_announcements_table
-php artisan make:migration create_rooms_table
-php artisan make:migration create_materials_table
-php artisan make:migration create_reservations_table
-
-# 8. Run all migrations
+# 6. Run all migrations
 php artisan migrate
 
-# 9. Create and run seeders
-php artisan make:seeder UserSeeder
-php artisan make:seeder CategorySeeder
-php artisan make:seeder RoomSeeder
-php artisan make:seeder MaterialSeeder
-php artisan make:seeder AnnouncementSeeder
+# 7. Create and run seeders
 php artisan db:seed
 
-# 10. Create controllers
-php artisan make:controller StudentDashboardController
-php artisan make:controller TeacherDashboardController
-php artisan make:controller AdminDashboardController
 
-# 11. Create models
-php artisan make:model Category
-php artisan make:model Announcement
-php artisan make:model Room
-php artisan make:model Material
-php artisan make:model Reservation
-
-# 12. Create role middleware
+# 8. Create role middleware
 php artisan make:middleware RoleMiddleware
 
-# 13. Compile assets and start application
+# 9. Compile assets and start application
 npm run dev
 
-# 14. Start server (in another terminal)
+# 10. Start server (in another terminal)
 php artisan serve
 
 # 15. Access the application
@@ -195,17 +165,9 @@ CampusConnect/
 
 After running the seeders:
 
-**Administrator**
-- Email: admin@campusconnect.com
-- Password: password123
+You will see them 
 
-**Teacher**
-- Email:  jean.leclerc@campusconnect.com  
-- Password: password123
 
-**Student**
-- Email: alexandre.durand@etudiant.campusconnect.com
-- Password: password123
 
 ## 🔧 Useful Commands
 
